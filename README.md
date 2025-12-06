@@ -91,6 +91,8 @@ mvn clean compile
 mvn spring-boot:run
 ```
 
+访问 localhost:8080 即可体验游戏
+
 ### 2. 简化版本（无依赖）
 
 ```bash
