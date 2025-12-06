@@ -1,0 +1,32 @@
+# 忽略文件和目录
+.git
+.gitignore
+target/
+*.log
+.DS_Store
+.idea/
+*.iml
+.settings/
+.classpath
+.project
+.factorypath
+.spring
+.vscode/
+*.swp
+*.swo
+*~
+
+# 忽略Node模块（如果有）
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 忽略Maven构建产物
+target/
+.mvn/
+dependency-reduced-pom.xml
+
+# 忽略临时文件
+*.tmp
+*.temp
