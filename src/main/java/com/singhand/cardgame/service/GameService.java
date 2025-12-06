@@ -1,0 +1,229 @@
+package com.singhand.cardgame.service;
+
+import com.singhand.cardgame.model.Card;
+import com.singhand.cardgame.model.CardPack;
+import com.singhand.cardgame.model.Player;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+
+@Service
+public class GameService {
+    private final Map<String, Player> players = new ConcurrentHashMap<>();
+    private final List<Card> allCards = new ArrayList<>();
+    private final AtomicLong cardIdGenerator = new AtomicLong(1);
+    private final AtomicLong packIdGenerator = new AtomicLong(1);
+    
+    public Player createPlayer(String username) {
+        Player player = new Player(username);
+        players.put(username, player);
+        return player;
+    }
+    
+    public Player createPlayer(String username, double initialMoney) {
+        Player player = new Player(username);
+        player.setMoney(initialMoney);
+        players.put(username, player);
+        return player;
+    }
+    
+    public Player getPlayer(String username) {
+        return players.get(username);
+    }
+    
+    public boolean buyCardPack(String username, CardPack.PackType packType) {
+        Player player = players.get(username);
+        if (player != null) {
+            return player.buyCardPack(packType, packIdGenerator.getAndIncrement());
+        }
+        return false;
+    }
+    
+    public List<Card> openCardPack(String username, long packId) {
+        Player player = players.get(username);
+        if (player != null) {
+            CardPack pack = player.openCardPack(packId);
+            if (pack != null) {
+                List<Card> cards = generateCardsFromPack(pack);
+                player.getCardCollection().addAll(cards);
+                return cards;
+            }
+        }
+        return null;
+    }
+    
+    public boolean sellCard(String username, long cardId) {
+        Player player = players.get(username);
+        if (player != null) {
+            return player.sellCard(cardId);
+        }
+        return false;
+    }
+    
+    public Map<String, Object> sellCardsBatch(String username, List<Long> cardIds) {
+        Map<String, Object> result = new HashMap<>();
+        List<Long> successfulIds = new ArrayList<>();
+        List<String> failedIds = new ArrayList<>();
+        double totalValue = 0.0;
+        
+        Player player = players.get(username);
+        if (player == null) {
+            result.put("success", false);
+            result.put("message", "玩家不存在");
+            return result;
+        }
+        
+        for (Long cardId : cardIds) {
+            if (player.sellCard(cardId)) {
+                successfulIds.add(cardId);
+            } else {
+                failedIds.add(String.valueOf(cardId));
+            }
+        }
+        
+        result.put("success", !successfulIds.isEmpty());
+        result.put("soldCount", successfulIds.size());
+        result.put("failedCount", failedIds.size());
+        result.put("successfulIds", successfulIds);
+        result.put("failedIds", failedIds);
+        result.put("totalValue", totalValue);
+        
+        if (!successfulIds.isEmpty()) {
+            result.put("message", String.format("成功出售 %d 张卡牌", successfulIds.size()));
+        } else {
+            result.put("message", "没有卡牌被出售");
+        }
+        
+        return result;
+    }
+    
+    public List<Card> generateCardsFromPack(CardPack pack) {
+        List<Card> cards = new ArrayList<>();
+        CardPack.PackType packType = pack.getPackType();
+        double[] rarityProbs = packType.getRarityProbabilities();
+        
+        for (int i = 0; i < 5; i++) {
+            Card.Rarity rarity = determineRarity(rarityProbs);
+            boolean isShiny = Math.random() < packType.getShinyProbability();
+            boolean isVariant = Math.random() < packType.getVariantProbability();
+            
+            Card.VariantType variantType = null;
+            if (isVariant) {
+                variantType = Math.random() < 0.5 ? Card.VariantType.WHITE : Card.VariantType.BLACK;
+            }
+            
+            Card card = createRandomCard(rarity, isShiny, isVariant, variantType);
+            cards.add(card);
+        }
+        
+        return cards;
+    }
+    
+    private static Card.Rarity determineRarity(double[] probabilities) {
+        double random = Math.random();
+        double cumulative = 0.0;
+        
+        for (int i = 0; i < probabilities.length; i++) {
+            cumulative += probabilities[i];
+            if (random < cumulative) {
+                switch (i) {
+                    case 0: return Card.Rarity.COMMON;
+                    case 1: return Card.Rarity.RARE;
+                    case 2: return Card.Rarity.EPIC;
+                    case 3: return Card.Rarity.LEGENDARY;
+                }
+            }
+        }
+        
+        return Card.Rarity.COMMON;
+    }
+    
+    private Card createRandomCard(Card.Rarity rarity, boolean isShiny, boolean isVariant, Card.VariantType variantType) {
+        Card card = new Card();
+        card.setId(cardIdGenerator.getAndIncrement());
+        card.setSerialNumber("CARD-" + card.getId());
+        card.setRarity(rarity);
+        card.setIsShiny(isShiny);
+        card.setIsVariant(isVariant);
+        card.setVariantType(variantType);
+        
+        List<Card> cardsByRarity = getCardsByRarity(rarity);
+        if (!cardsByRarity.isEmpty()) {
+            Card templateCard = cardsByRarity.get((int)(Math.random() * cardsByRarity.size()));
+            card.setFixedName(templateCard.getFixedName());
+            card.setDescription(templateCard.getDescription());
+            card.setBasePrice(templateCard.getBasePrice());
+        }
+        
+        card.generateActualName();
+        card.calculateActualPrice();
+        
+        return card;
+    }
+    
+    private List<Card> getCardsByRarity(Card.Rarity rarity) {
+        List<Card> result = new ArrayList<>();
+        System.out.println("查找稀有度: " + rarity + ", 总卡牌数: " + allCards.size());
+        for (Card card : allCards) {
+            if (card.getRarity().equals(rarity)) {
+                result.add(card);
+            }
+        }
+        System.out.println("找到匹配卡牌数: " + result.size());
+        return result;
+    }
+    
+    public void initializeCards(List<Card> cards) {
+        allCards.clear();
+        allCards.addAll(cards);
+        System.out.println("GameService初始化卡牌: " + cards.size() + " 张");
+    }
+    
+    public List<Map<String, Object>> getLeaderboard() {
+        List<Map<String, Object>> allPlayerCards = new ArrayList<>();
+        
+        // 收集所有玩家的卡牌
+        for (Map.Entry<String, Player> entry : players.entrySet()) {
+            String username = entry.getKey();
+            Player player = entry.getValue();
+            
+            if (player.getCardCollection() != null) {
+                for (Card card : player.getCardCollection()) {
+                    Map<String, Object> cardEntry = new HashMap<>();
+                    cardEntry.put("cardId", card.getId());
+                    cardEntry.put("cardName", card.getActualName() != null ? card.getActualName() : card.getFixedName());
+                    cardEntry.put("serialNumber", card.getSerialNumber());
+                    cardEntry.put("rarity", card.getRarity());
+                    cardEntry.put("isShiny", card.getIsShiny());
+                    cardEntry.put("isVariant", card.getIsVariant());
+                    cardEntry.put("variantType", card.getVariantType());
+                    cardEntry.put("description", card.getDescription());
+                    cardEntry.put("actualPrice", card.getActualPrice());
+                    cardEntry.put("basePrice", card.getBasePrice());
+                    cardEntry.put("playerName", username);
+                    allPlayerCards.add(cardEntry);
+                }
+            }
+        }
+        
+        // 按价格降序排序
+        allPlayerCards.sort((a, b) -> {
+            Double priceA = (Double) a.get("actualPrice");
+            Double priceB = (Double) b.get("actualPrice");
+            return priceB.compareTo(priceA);
+        });
+        
+        // 返回前100名
+        int topCount = Math.min(100, allPlayerCards.size());
+        return allPlayerCards.subList(0, topCount);
+    }
+    
+    public List<Card> getAllCards() {
+        return new ArrayList<>(allCards);
+    }
+}

@@ -1,0 +1,845 @@
+/* 全局样式 */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 导航栏样式 */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* 卡片样式 */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    font-weight: bold;
+}
+
+/* 卡牌包卡片样式 */
+.pack-card {
+    background: linear-gradient(145deg, #f3f4f6, #ffffff);
+    border: 2px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.pack-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: rotate(45deg);
+    transition: all 0.5s ease;
+    opacity: 0;
+}
+
+.pack-card:hover::before {
+    animation: shine 0.5s ease;
+}
+
+.pack-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.pack-card.common {
+    border-color: #6b7280;
+    background: linear-gradient(145deg, #e5e7eb, #f9fafb);
+}
+
+.pack-card.rare {
+    border-color: #3b82f6;
+    background: linear-gradient(145deg, #dbeafe, #eff6ff);
+}
+
+.pack-card.epic {
+    border-color: #a855f7;
+    background: linear-gradient(145deg, #f3e8ff, #faf5ff);
+}
+
+.pack-card.legendary {
+    border-color: #f59e0b;
+    background: linear-gradient(145deg, #fef3c7, #fffbeb);
+    border-width: 3px;
+}
+
+.pack-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #f59e0b;
+    margin: 10px 0;
+}
+
+.pack-description {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 10px 0;
+}
+
+/* 卡牌样式 */
+.card-item {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.card-item:hover {
+    transform: translateY(-8px) rotate(2deg);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+.card-item.common {
+    border: 2px solid #6b7280;
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+}
+
+.card-item.rare {
+    border: 2px solid #3b82f6;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+}
+
+.card-item.epic {
+    border: 2px solid #a855f7;
+    background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+}
+
+.card-item.legendary {
+    border: 3px solid #f59e0b;
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+}
+
+.card-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin: 10px 0;
+    color: #1f2937;
+}
+
+.card-rarity {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.card-rarity.common {
+    background: #6b7280;
+    color: white;
+}
+
+.card-rarity.rare {
+    background: #3b82f6;
+    color: white;
+}
+
+.card-rarity.epic {
+    background: #a855f7;
+    color: white;
+}
+
+.card-rarity.legendary {
+    background: #f59e0b;
+    color: white;
+}
+
+.card-price {
+    color: #059669;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+
+.card-attributes {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 8px 0;
+}
+
+.shiny-badge, .variant-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.shiny-badge {
+    background: linear-gradient(45deg, #fbbf24, #f59e0b);
+    color: white;
+    animation: shimmer 2s infinite;
+}
+
+.variant-badge {
+    background: linear-gradient(45deg, #6b7280, #374151);
+    color: white;
+}
+
+/* 闪卡动画 */
+@keyframes shimmer {
+    0% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 0.8; transform: scale(1); }
+}
+
+/* 闪卡白光特效 */
+@keyframes shinyFlash {
+    0% { 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: inherit;
+    }
+    48% { 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: inherit;
+    }
+    50% { 
+        box-shadow: 0 5px 25px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.6);
+        border-color: #ffffff;
+        background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+    }
+    52% { 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: inherit;
+        background: inherit;
+    }
+    100% { 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: inherit;
+    }
+}
+
+.card-item.shiny-effect {
+    animation: shinyFlash 3s infinite;
+    position: relative;
+}
+
+.card-item.shiny-effect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shinySweep 3s infinite;
+}
+
+@keyframes shinySweep {
+    0% { left: -100%; }
+    48% { left: -100%; }
+    50% { left: 100%; }
+    52% { left: 100%; }
+    100% { left: -100%; }
+}
+
+/* 黑卡特效 */
+.card-item.black-variant {
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important;
+    border: 2px solid #000000 !important;
+    color: #ffffff !important;
+}
+
+.card-item.black-variant .card-name,
+.card-item.black-variant .card-rarity,
+.card-item.black-variant .card-price {
+    color: #ffffff !important;
+}
+
+.card-item.black-variant .shiny-badge,
+.card-item.black-variant .variant-badge {
+    background: linear-gradient(45deg, #6b7280, #374151) !important;
+    color: #ffffff !important;
+}
+
+@keyframes blackPulse {
+    0% { box-shadow: 0 5px 15px rgba(0,0,0,0.3), 0 0 20px rgba(0,0,0,0.2); }
+    50% { box-shadow: 0 5px 25px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.4); }
+    100% { box-shadow: 0 5px 15px rgba(0,0,0,0.3), 0 0 20px rgba(0,0,0,0.2); }
+}
+
+.card-item.black-variant.black-effect {
+    animation: blackPulse 2s infinite;
+}
+
+/* 白卡特效 */
+.card-item.white-variant {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+    border: 2px solid #ffffff !important;
+    color: #1a1a1a !important;
+}
+
+.card-item.white-variant .card-name,
+.card-item.white-variant .card-rarity,
+.card-item.white-variant .card-price {
+    color: #1a1a1a !important;
+}
+
+.card-item.white-variant .shiny-badge,
+.card-item.white-variant .variant-badge {
+    background: linear-gradient(45deg, #e9ecef, #f8f9fa) !important;
+    color: #1a1a1a !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+@keyframes whiteGlow {
+    0% { box-shadow: 0 5px 15px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.2); }
+    50% { box-shadow: 0 5px 25px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.6); }
+    100% { box-shadow: 0 5px 15px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.2); }
+}
+
+.card-item.white-variant.white-effect {
+    animation: whiteGlow 2s infinite;
+}
+
+/* 七彩边框特效 */
+.card-item.rainbow-border {
+    position: relative;
+    border: 3px solid transparent !important;
+    background-clip: padding-box;
+    z-index: 1;
+}
+
+.card-item.rainbow-border::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg, 
+        #ff0000 0%, 
+        #ff8800 16.66%, 
+        #ffff00 33.33%, 
+        #00ff00 50%, 
+        #0088ff 66.66%, 
+        #8800ff 83.33%, 
+        #ff0000 100%);
+    border-radius: 18px;
+    z-index: -1;
+    animation: rainbowFlow 3s linear infinite;
+}
+
+.card-item.rainbow-border::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg, 
+        #ff0000 0%, 
+        #ff8800 16.66%, 
+        #ffff00 33.33%, 
+        #00ff00 50%, 
+        #0088ff 66.66%, 
+        #8800ff 83.33%, 
+        #ff0000 100%);
+    border-radius: 18px;
+    z-index: -2;
+    animation: rainbowFlow 3s linear infinite reverse;
+    filter: blur(3px);
+    opacity: 0.7;
+}
+
+@keyframes rainbowFlow {
+    0% { 
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg);
+    }
+    100% { 
+        background-position: 100% 50%;
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* 七彩光晕效果 */
+.card-item.rainbow-border {
+    box-shadow: 
+        0 0 20px rgba(255, 0, 0, 0.6),
+        0 0 40px rgba(255, 136, 0, 0.4),
+        0 0 60px rgba(255, 255, 0, 0.3),
+        inset 0 0 20px rgba(0, 255, 0, 0.2);
+    animation: rainbowGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes rainbowGlow {
+    0% {
+        box-shadow: 
+            0 0 20px rgba(255, 0, 0, 0.6),
+            0 0 40px rgba(255, 136, 0, 0.4),
+            0 0 60px rgba(255, 255, 0, 0.3),
+            inset 0 0 20px rgba(0, 255, 0, 0.2);
+    }
+    25% {
+        box-shadow: 
+            0 0 20px rgba(255, 255, 0, 0.6),
+            0 0 40px rgba(0, 255, 0, 0.4),
+            0 0 60px rgba(0, 136, 255, 0.3),
+            inset 0 0 20px rgba(136, 0, 255, 0.2);
+    }
+    50% {
+        box-shadow: 
+            0 0 20px rgba(0, 255, 0, 0.6),
+            0 0 40px rgba(0, 136, 255, 0.4),
+            0 0 60px rgba(136, 0, 255, 0.3),
+            inset 0 0 20px rgba(255, 0, 136, 0.2);
+    }
+    75% {
+        box-shadow: 
+            0 0 20px rgba(136, 0, 255, 0.6),
+            0 0 40px rgba(255, 0, 136, 0.4),
+            0 0 60px rgba(255, 0, 0, 0.3),
+            inset 0 0 20px rgba(255, 255, 0, 0.2);
+    }
+    100% {
+        box-shadow: 
+            0 0 20px rgba(255, 0, 0, 0.6),
+            0 0 40px rgba(255, 136, 0, 0.4),
+            0 0 60px rgba(255, 255, 0, 0.3),
+            inset 0 0 20px rgba(0, 255, 0, 0.2);
+    }
+}
+
+@keyframes shine {
+    0% { opacity: 0; transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    50% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+/* 开包动画 */
+.pack-opening {
+    animation: packShake 0.5s ease-in-out;
+}
+
+@keyframes packShake {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-5deg) scale(1.05); }
+    75% { transform: rotate(5deg) scale(1.05); }
+}
+
+.card-reveal {
+    animation: cardFlip 0.6s ease-in-out;
+}
+
+@keyframes cardFlip {
+    0% { transform: rotateY(90deg) scale(0.8); opacity: 0; }
+    50% { transform: rotateY(45deg) scale(1.1); }
+    100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+}
+
+/* 按钮样式 */
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* 模态框样式 */
+.modal-content {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    border-radius: 20px 20px 0 0;
+    border: none;
+}
+
+/* Toast样式 */
+.toast {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .card-item {
+        margin: 5px;
+        min-height: 150px;
+    }
+    
+    .pack-card {
+        margin-bottom: 15px;
+    }
+    
+    .card-name {
+        font-size: 0.9rem;
+    }
+    
+    .card-price {
+        font-size: 0.9rem;
+    }
+}
+
+/* 加载动画 */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 概率表格样式 */
+.probability-table {
+    font-size: 0.8rem;
+    margin-top: 10px;
+}
+
+.probability-table th {
+    background: #f3f4f6;
+    font-weight: 600;
+}
+
+/* 空状态样式 */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+/* 统计信息样式 */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+/* 批量选择样式 */
+.card-select-checkbox {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.card-select-checkbox:hover {
+    background: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.card-select-checkbox .form-check-input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    margin: 0;
+    accent-color: #3b82f6;
+}
+
+.card-select-checkbox .form-check-input:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.card-item {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.card-item.selected {
+    border: 3px solid #3b82f6;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    transform: translateY(-5px);
+}
+
+/* 批量操作工具栏样式优化 */
+#bulkActions .card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+}
+
+#bulkActions .btn-group .btn {
+    border-radius: 8px;
+    margin: 0 2px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#bulkActions .btn-group .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+#bulkActions .btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border: none;
+    font-weight: 600;
+    padding: 8px 20px;
+    transition: all 0.3s ease;
+}
+
+#bulkActions .btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+#selectedCount {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+    color: #dc2626;
+}
+
+/* 批量选择开关样式 */
+.form-check-input[type="checkbox"]:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.form-check-input[type="checkbox"]:focus {
+    border-color: #3b82f6;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+}
+
+/* 变异&闪按钮样式 */
+.btn-gradient {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+}
+
+.btn-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-gradient:hover::before {
+    left: 100%;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1f2937;
+}
+
+.stat-label {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* 排行榜样式 */
+.leaderboard-item {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.leaderboard-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.leaderboard-rank {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: white;
+    z-index: 10;
+}
+
+.rank-1 {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #8b4513;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+.rank-2 {
+    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+    color: #696969;
+    box-shadow: 0 0 20px rgba(192, 192, 192, 0.6);
+}
+
+.rank-3 {
+    background: linear-gradient(135deg, #cd7f32, #e4a853);
+    color: #8b4513;
+    box-shadow: 0 0 20px rgba(205, 127, 50, 0.6);
+}
+
+.rank-other {
+    background: linear-gradient(135deg, #6b7280, #9ca3af);
+    color: white;
+}
+
+.leaderboard-content {
+    margin-left: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.leaderboard-card-info {
+    flex: 1;
+}
+
+.leaderboard-player-info {
+    text-align: right;
+    margin-left: 20px;
+}
+
+.leaderboard-card-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    color: #1f2937;
+}
+
+.leaderboard-serial {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+
+.leaderboard-attributes {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.leaderboard-price {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #059669;
+}
+
+.leaderboard-player-name {
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 5px;
+}
+
+.leaderboard-rarity {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* 排行榜奖杯样式 */
+.trophy-icon {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 2rem;
+    animation: trophyShine 2s infinite;
+}
+
+@keyframes trophyShine {
+    0%, 100% { transform: scale(1) rotate(-5deg); }
+    50% { transform: scale(1.1) rotate(5deg); }
+}
+
+/* 排行榜统计 */
+.leaderboard-stats {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
