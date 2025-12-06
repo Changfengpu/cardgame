@@ -83,6 +83,22 @@ public class GameController {
     public ResponseEntity<?> openCardPacksBatch(@PathVariable String username, 
                                                 @RequestParam CardPack.PackType packType,
                                                 @RequestParam(defaultValue = "all") String quantity) {
+        // 如果不是"all"，检查数量是否在1-1000之间
+        if (!quantity.equals("all")) {
+            try {
+                int qty = Integer.parseInt(quantity);
+                if (qty <= 0 || qty > 1000) {
+                    Map<String, String> response = new HashMap<>();
+                    response.put("message", "开包数量必须在1-1000之间");
+                    return ResponseEntity.badRequest().body(response);
+                }
+            } catch (NumberFormatException e) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "无效的数量参数");
+                return ResponseEntity.badRequest().body(response);
+            }
+        }
+        
         Map<String, Object> result = gameService.openCardPacksBatch(username, packType, quantity);
         return ResponseEntity.ok(result);
     }

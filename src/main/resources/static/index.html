@@ -336,8 +336,8 @@
                     </div>
                     <div class="mb-3">
                         <label for="bulkBuyQuantity" class="form-label">购买数量</label>
-                        <input type="number" class="form-control" id="bulkBuyQuantity" min="1" value="10">
-                        <div class="form-text">最多可购买100个，总价格: <span id="bulkTotalPrice" class="text-primary fw-bold">0</span> 金币</div>
+                        <input type="number" class="form-control" id="bulkBuyQuantity" min="1" max="1000" value="10">
+                        <div class="form-text">最多可购买1000个，总价格: <span id="bulkTotalPrice" class="text-primary fw-bold">0</span> 金币</div>
                     </div>
                     <div class="mb-3">
                         <div class="alert alert-info">
@@ -345,10 +345,18 @@
                             <span id="bulkBuyInfo">批量购买将一次性购买多个卡牌包并放入背包</span>
                         </div>
                     </div>
+                    
+                    <!-- 加载动画 -->
+                    <div id="bulkBuyLoading" class="text-center" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2">正在批量购买中，请稍候...</p>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-success" onclick="confirmBulkBuy()">确认购买</button>
+                    <button type="button" class="btn btn-success" id="confirmBulkBuyBtn" onclick="confirmBulkBuy()">确认购买</button>
                 </div>
             </div>
         </div>
@@ -369,14 +377,34 @@
                             <!-- 卡牌包类型将通过JavaScript动态生成 -->
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <label for="bulkOpenQuantity" class="form-label">开包数量</label>
+                        <select class="form-select" id="bulkOpenQuantity">
+                            <option value="all">全部开启</option>
+                            <option value="10">开启10个</option>
+                            <option value="50">开启50个</option>
+                            <option value="100">开启100个</option>
+                            <option value="500">开启500个</option>
+                            <option value="1000">开启1000个</option>
+                        </select>
+                        <div class="form-text">最多可开启1000个卡牌包</div>
+                    </div>
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i> 
-                        批量开包将开启所有选定类型的卡牌包，开包结果会按稀有度和价格排序
+                        批量开包将开启选定数量的卡牌包，开包结果会按稀有度和价格排序
+                    </div>
+                    
+                    <!-- 加载动画 -->
+                    <div id="bulkOpenLoading" class="text-center" style="display: none;">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2">正在批量开包中，请稍候...</p>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-warning" onclick="confirmBulkOpen()">确认开包</button>
+                    <button type="button" class="btn btn-warning" id="confirmBulkOpenBtn" onclick="confirmBulkOpen()">确认开包</button>
                 </div>
             </div>
         </div>

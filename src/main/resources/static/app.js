@@ -283,6 +283,7 @@ function showBulkBuyModal(packType) {
     document.getElementById('bulkPackType').textContent = data.name;
     document.getElementById('bulkPackType').className = `badge bg-${getPackTypeBadgeClass(packType)}`;
     document.getElementById('bulkBuyQuantity').value = 10;
+    document.getElementById('bulkBuyQuantity').max = 1000;
     updateBulkTotalPrice(packType);
 
     const modal = new bootstrap.Modal(document.getElementById('bulkBuyModal'));
@@ -314,6 +315,11 @@ async function confirmBulkBuy() {
         showToast('购买数量必须大于0', 'warning');
         return;
     }
+    
+    if (quantity > 1000) {
+        showToast('购买数量不能超过1000', 'warning');
+        return;
+    }
 
     // 获取packType枚举值
     const packTypeEnum = getPackTypeEnum(packType);
@@ -321,6 +327,10 @@ async function confirmBulkBuy() {
         showToast('无效的卡牌包类型', 'error');
         return;
     }
+
+    // 显示加载动画，禁用按钮
+    document.getElementById('bulkBuyLoading').style.display = 'block';
+    document.getElementById('confirmBulkBuyBtn').disabled = true;
 
     try {
         const response = await fetch(`${API_BASE}/player/${currentPlayer.username}/buy-packs-batch?packType=${packTypeEnum}&quantity=${quantity}`, {
@@ -344,6 +354,10 @@ async function confirmBulkBuy() {
     } catch (error) {
         console.error('批量购买失败:', error);
         showToast('网络错误，请重试', 'error');
+    } finally {
+        // 隐藏加载动画，启用按钮
+        document.getElementById('bulkBuyLoading').style.display = 'none';
+        document.getElementById('confirmBulkBuyBtn').disabled = false;
     }
 }
 
@@ -593,6 +607,7 @@ function showBulkOpenModal() {
                                 <div style="font-size: 2rem;">${data.icon}</div>
                                 <h6>${data.name}</h6>
                                 <span class="badge bg-primary">${count} 个</span>
+                                ${count > 1000 ? '<span class="badge bg-warning ms-1">超过上限</span>' : ''}
                             </label>
                         </div>
                     </div>
@@ -601,6 +616,9 @@ function showBulkOpenModal() {
             packTypesContainer.appendChild(packDiv);
         }
     });
+
+    // 重置开包数量选择
+    document.getElementById('bulkOpenQuantity').value = 'all';
 
     const modal = new bootstrap.Modal(document.getElementById('bulkOpenModal'));
     modal.show();
@@ -620,23 +638,40 @@ async function confirmBulkOpen() {
     }
 
     const packType = selectedType.value;
+    const quantity = document.getElementById('bulkOpenQuantity').value;
     const packsToOpen = currentPlayer.backpack.filter(pack => pack.packType === packType);
     
     if (packsToOpen.length === 0) {
         showToast('没有找到该类型的卡牌包', 'warning');
         return;
     }
+    
+    // 检查数量限制
+    if (quantity !== 'all') {
+        const qty = parseInt(quantity);
+        if (qty > 1000) {
+            showToast('开包数量不能超过1000', 'warning');
+            return;
+        }
+        if (qty > packsToOpen.length) {
+            showToast(`只有${packsToOpen.length}个该类型的卡牌包`, 'warning');
+            return;
+        }
+    }
 
-    bootstrap.Modal.getInstance(document.getElementById('bulkOpenModal')).hide();
+    // 显示加载动画，禁用按钮
+    document.getElementById('bulkOpenLoading').style.display = 'block';
+    document.getElementById('confirmBulkOpenBtn').disabled = true;
 
     try {
-        const response = await fetch(`${API_BASE}/player/${currentPlayer.username}/open-packs-batch?packType=${packType}&quantity=all`, {
+        const response = await fetch(`${API_BASE}/player/${currentPlayer.username}/open-packs-batch?packType=${packType}&quantity=${quantity}`, {
             method: 'POST'
         });
 
         if (response.ok) {
             const result = await response.json();
             if (result.success) {
+                bootstrap.Modal.getInstance(document.getElementById('bulkOpenModal')).hide();
                 showToast(result.message, 'success');
                 // 先刷新玩家信息，再渲染背包
                 await refreshPlayerInfo();
@@ -657,6 +692,10 @@ async function confirmBulkOpen() {
     } catch (error) {
         console.error('批量开包失败:', error);
         showToast('网络错误，请重试', 'error');
+    } finally {
+        // 隐藏加载动画，启用按钮
+        document.getElementById('bulkOpenLoading').style.display = 'none';
+        document.getElementById('confirmBulkOpenBtn').disabled = false;
     }
 }
 
