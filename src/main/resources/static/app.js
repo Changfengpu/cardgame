@@ -141,6 +141,9 @@ function showPlayerInfo() {
     document.getElementById('playerMoneyDetail').textContent = currentPlayer.money.toFixed(2);
     document.getElementById('cardCount').textContent = currentPlayer.cardCollection ? currentPlayer.cardCollection.length : 0;
     document.getElementById('packCount').textContent = currentPlayer.backpack ? currentPlayer.backpack.length : 0;
+    
+    // 检查是否显示作弊功能按钮
+    checkCheatButton();
 }
 
 // 启用游戏按钮
@@ -1596,6 +1599,71 @@ function getRarityDisplayName(rarity) {
         'LEGENDARY': '传说'
     };
     return names[rarity] || '普通';
+}
+
+// 作弊功能相关函数
+async function checkCheatButton() {
+    if (!currentPlayer) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/player/${currentPlayer.username}/cheat-status`);
+        if (response.ok) {
+            const status = await response.json();
+            if (status.isCheater) {
+                document.getElementById('cheatBtn').style.display = 'block';
+            } else {
+                document.getElementById('cheatBtn').style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('检查作弊状态失败:', error);
+    }
+}
+
+async function showCheatSettings() {
+    if (!currentPlayer) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/player/${currentPlayer.username}/cheat-status`);
+        if (response.ok) {
+            const status = await response.json();
+            document.getElementById('guaranteedLegendary').checked = status.guaranteedLegendary;
+            document.getElementById('guaranteedShiny').checked = status.guaranteedShiny;
+            document.getElementById('guaranteedVariant').checked = status.guaranteedVariant;
+            
+            const modal = new bootstrap.Modal(document.getElementById('cheatModal'));
+            modal.show();
+        }
+    } catch (error) {
+        console.error('获取作弊设置失败:', error);
+        showToast('获取作弊设置失败', 'error');
+    }
+}
+
+async function updateCheatSettings() {
+    if (!currentPlayer) return;
+    
+    const guaranteedLegendary = document.getElementById('guaranteedLegendary').checked;
+    const guaranteedShiny = document.getElementById('guaranteedShiny').checked;
+    const guaranteedVariant = document.getElementById('guaranteedVariant').checked;
+    
+    try {
+        const response = await fetch(`${API_BASE}/player/${currentPlayer.username}/cheat-settings?guaranteedLegendary=${guaranteedLegendary}&guaranteedShiny=${guaranteedShiny}&guaranteedVariant=${guaranteedVariant}`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            bootstrap.Modal.getInstance(document.getElementById('cheatModal')).hide();
+            showToast(result.message, 'success');
+        } else {
+            const error = await response.json();
+            showToast(error.message, 'error');
+        }
+    } catch (error) {
+        console.error('更新作弊设置失败:', error);
+        showToast('网络错误，请重试', 'error');
+    }
 }
 
 // 批量选择相关函数

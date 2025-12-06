@@ -176,4 +176,38 @@ public class GameController {
         List<Map<String, Object>> leaderboard = gameService.getLeaderboard();
         return ResponseEntity.ok(leaderboard);
     }
+    
+    // 作弊功能相关接口
+    @GetMapping("/player/{username}/cheat-status")
+    public ResponseEntity<Map<String, Object>> getCheatStatus(@PathVariable String username) {
+        Player player = gameService.getPlayer(username);
+        if (player != null) {
+            Map<String, Object> status = new HashMap<>();
+            status.put("isCheater", "zlf".equals(username));
+            status.put("guaranteedLegendary", gameService.isGuaranteedLegendary(username));
+            status.put("guaranteedShiny", gameService.isGuaranteedShiny(username));
+            status.put("guaranteedVariant", gameService.isGuaranteedVariant(username));
+            return ResponseEntity.ok(status);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
+    @PostMapping("/player/{username}/cheat-settings")
+    public ResponseEntity<?> updateCheatSettings(@PathVariable String username, 
+                                                 @RequestParam boolean guaranteedLegendary,
+                                                 @RequestParam boolean guaranteedShiny,
+                                                 @RequestParam boolean guaranteedVariant) {
+        Player player = gameService.getPlayer(username);
+        if (player != null && "zlf".equals(username)) {
+            gameService.updateCheatSettings(username, guaranteedLegendary, guaranteedShiny, guaranteedVariant);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "作弊设置更新成功");
+            return ResponseEntity.ok(response);
+        } else {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "玩家不存在或无权限");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 }

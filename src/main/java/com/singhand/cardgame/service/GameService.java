@@ -19,6 +19,9 @@ public class GameService {
     private final AtomicLong cardIdGenerator = new AtomicLong(1);
     private final AtomicLong packIdGenerator = new AtomicLong(1);
     
+    // 作弊功能设置
+    private final Map<String, Boolean> cheatSettings = new ConcurrentHashMap<>();
+    
     public Player createPlayer(String username) {
         Player player = new Player(username);
         players.put(username, player);
@@ -91,7 +94,7 @@ public class GameService {
         if (player != null) {
             CardPack pack = player.openCardPack(packId);
             if (pack != null) {
-                List<Card> cards = generateCardsFromPack(pack);
+                List<Card> cards = generateCardsFromPack(pack, username);
                 player.getCardCollection().addAll(cards);
                 return cards;
             }
@@ -142,7 +145,7 @@ public class GameService {
         List<Card> allCards = new ArrayList<>();
         for (int i = 0; i < openCount; i++) {
             CardPack pack = packsToOpen.get(i);
-            List<Card> cards = generateCardsFromPack(pack);
+            List<Card> cards = generateCardsFromPack(pack, username);
             allCards.addAll(cards);
         }
         
@@ -224,10 +227,87 @@ public class GameService {
         CardPack.PackType packType = pack.getPackType();
         double[] rarityProbs = packType.getRarityProbabilities();
         
+        // 获取卡牌包的所有者（这里需要从调用处传递username，暂时用null）
+        // 在实际调用时，会传递正确的username
+        String username = null;
+        
         for (int i = 0; i < 5; i++) {
-            Card.Rarity rarity = determineRarity(rarityProbs);
-            boolean isShiny = Math.random() < packType.getShinyProbability();
-            boolean isVariant = Math.random() < packType.getVariantProbability();
+            Card.Rarity rarity;
+            boolean isShiny;
+            boolean isVariant;
+            
+            // 检查作弊设置
+            if (username != null) {
+                // 必定传说卡
+                if (isGuaranteedLegendary(username)) {
+                    rarity = Card.Rarity.LEGENDARY;
+                } else {
+                    rarity = determineRarity(rarityProbs);
+                }
+                
+                // 必定闪卡
+                if (isGuaranteedShiny(username)) {
+                    isShiny = true;
+                } else {
+                    isShiny = Math.random() < packType.getShinyProbability();
+                }
+                
+                // 必定变异卡
+                if (isGuaranteedVariant(username)) {
+                    isVariant = true;
+                } else {
+                    isVariant = Math.random() < packType.getVariantProbability();
+                }
+            } else {
+                // 没有用户名时使用正常逻辑
+                rarity = determineRarity(rarityProbs);
+                isShiny = Math.random() < packType.getShinyProbability();
+                isVariant = Math.random() < packType.getVariantProbability();
+            }
+            
+            Card.VariantType variantType = null;
+            if (isVariant) {
+                variantType = Math.random() < 0.5 ? Card.VariantType.WHITE : Card.VariantType.BLACK;
+            }
+            
+            Card card = createRandomCard(rarity, isShiny, isVariant, variantType);
+            cards.add(card);
+        }
+        
+        return cards;
+    }
+    
+    // 重载方法，支持传递用户名
+    public List<Card> generateCardsFromPack(CardPack pack, String username) {
+        List<Card> cards = new ArrayList<>();
+        CardPack.PackType packType = pack.getPackType();
+        double[] rarityProbs = packType.getRarityProbabilities();
+        
+        for (int i = 0; i < 5; i++) {
+            Card.Rarity rarity;
+            boolean isShiny;
+            boolean isVariant;
+            
+            // 检查作弊设置
+            if (isGuaranteedLegendary(username)) {
+                rarity = Card.Rarity.LEGENDARY;
+            } else {
+                rarity = determineRarity(rarityProbs);
+            }
+            
+            // 必定闪卡
+            if (isGuaranteedShiny(username)) {
+                isShiny = true;
+            } else {
+                isShiny = Math.random() < packType.getShinyProbability();
+            }
+            
+            // 必定变异卡
+            if (isGuaranteedVariant(username)) {
+                isVariant = true;
+            } else {
+                isVariant = Math.random() < packType.getVariantProbability();
+            }
             
             Card.VariantType variantType = null;
             if (isVariant) {
@@ -342,5 +422,24 @@ public class GameService {
     
     public List<Card> getAllCards() {
         return new ArrayList<>(allCards);
+    }
+    
+    // 作弊功能相关方法
+    public boolean isGuaranteedLegendary(String username) {
+        return cheatSettings.getOrDefault(username + "_legendary", false);
+    }
+    
+    public boolean isGuaranteedShiny(String username) {
+        return cheatSettings.getOrDefault(username + "_shiny", false);
+    }
+    
+    public boolean isGuaranteedVariant(String username) {
+        return cheatSettings.getOrDefault(username + "_variant", false);
+    }
+    
+    public void updateCheatSettings(String username, boolean guaranteedLegendary, boolean guaranteedShiny, boolean guaranteedVariant) {
+        cheatSettings.put(username + "_legendary", guaranteedLegendary);
+        cheatSettings.put(username + "_shiny", guaranteedShiny);
+        cheatSettings.put(username + "_variant", guaranteedVariant);
     }
 }
