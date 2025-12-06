@@ -44,6 +44,48 @@ public class GameService {
         return false;
     }
     
+    public Map<String, Object> buyCardPacksBatch(String username, CardPack.PackType packType, int quantity) {
+        Map<String, Object> result = new HashMap<>();
+        Player player = players.get(username);
+        
+        if (player == null) {
+            result.put("success", false);
+            result.put("message", "玩家不存在");
+            return result;
+        }
+        
+        // 计算总价格
+        double totalPrice = packType.getPrice() * quantity;
+        
+        // 检查金币是否足够
+        if (player.getMoney() < totalPrice) {
+            result.put("success", false);
+            result.put("message", "金币不足");
+            result.put("required", totalPrice);
+            result.put("available", player.getMoney());
+            return result;
+        }
+        
+        // 扣除金币
+        player.setMoney(player.getMoney() - totalPrice);
+        
+        // 批量添加卡牌包到背包
+        int successCount = 0;
+        for (int i = 0; i < quantity; i++) {
+            if (player.buyCardPack(packType, packIdGenerator.getAndIncrement(), false)) {
+                successCount++;
+            }
+        }
+        
+        result.put("success", true);
+        result.put("message", String.format("成功购买 %d 个卡牌包", successCount));
+        result.put("quantity", successCount);
+        result.put("totalPrice", totalPrice);
+        result.put("remainingMoney", player.getMoney());
+        
+        return result;
+    }
+    
     public List<Card> openCardPack(String username, long packId) {
         Player player = players.get(username);
         if (player != null) {
@@ -55,6 +97,81 @@ public class GameService {
             }
         }
         return null;
+    }
+    
+    public Map<String, Object> openCardPacksBatch(String username, CardPack.PackType packType, String quantity) {
+        Map<String, Object> result = new HashMap<>();
+        Player player = players.get(username);
+        
+        if (player == null) {
+            result.put("success", false);
+            result.put("message", "玩家不存在");
+            return result;
+        }
+        
+        // 获取指定类型的所有卡牌包
+        List<CardPack> packsToOpen = new ArrayList<>();
+        List<Long> packIdsToRemove = new ArrayList<>();
+        
+        for (int i = 0; i < player.getBackpack().size(); i++) {
+            CardPack pack = player.getBackpack().get(i);
+            if (pack.getPackType() == packType) {
+                packsToOpen.add(pack);
+                packIdsToRemove.add(pack.getId());
+            }
+        }
+        
+        if (packsToOpen.isEmpty()) {
+            result.put("success", false);
+            result.put("message", "没有找到指定类型的卡牌包");
+            return result;
+        }
+        
+        // 确定要开启的数量
+        int openCount = packsToOpen.size();
+        if (!quantity.equals("all")) {
+            try {
+                int requestedCount = Integer.parseInt(quantity);
+                openCount = Math.min(requestedCount, packsToOpen.size());
+            } catch (NumberFormatException e) {
+                // 如果解析失败，默认开启所有
+            }
+        }
+        
+        // 批量开启卡牌包
+        List<Card> allCards = new ArrayList<>();
+        for (int i = 0; i < openCount; i++) {
+            CardPack pack = packsToOpen.get(i);
+            List<Card> cards = generateCardsFromPack(pack);
+            allCards.addAll(cards);
+        }
+        
+        // 从背包中移除已开启的卡牌包
+        for (int i = 0; i < openCount; i++) {
+            player.openCardPack(packIdsToRemove.get(i));
+        }
+        
+        // 将卡牌添加到玩家收藏
+        player.getCardCollection().addAll(allCards);
+        
+        // 按稀有度和价格排序
+        allCards.sort((a, b) -> {
+            // 先按稀有度排序
+            int rarityCompare = b.getRarity().ordinal() - a.getRarity().ordinal();
+            if (rarityCompare != 0) {
+                return rarityCompare;
+            }
+            // 同稀有度按价格排序（高价格在前）
+            return Double.compare(b.getActualPrice(), a.getActualPrice());
+        });
+        
+        result.put("success", true);
+        result.put("message", String.format("成功开启 %d 个卡牌包，获得 %d 张卡牌", openCount, allCards.size()));
+        result.put("packsOpened", openCount);
+        result.put("cards", allCards);
+        result.put("remainingPacks", player.getBackpack().size());
+        
+        return result;
     }
     
     public boolean sellCard(String username, long cardId) {

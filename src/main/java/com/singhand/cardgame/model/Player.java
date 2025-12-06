@@ -29,6 +29,19 @@ public class Player {
         return false;
     }
     
+    public boolean buyCardPack(CardPack.PackType packType, long packId, boolean checkMoney) {
+        if (!checkMoney || money >= packType.getPrice()) {
+            if (checkMoney) {
+                money -= packType.getPrice();
+            }
+            CardPack pack = new CardPack(packType);
+            pack.setId(packId);
+            backpack.add(pack);
+            return true;
+        }
+        return false;
+    }
+    
     public CardPack openCardPack(long packId) {
         for (int i = 0; i < backpack.size(); i++) {
             if (backpack.get(i).getId() == packId) {

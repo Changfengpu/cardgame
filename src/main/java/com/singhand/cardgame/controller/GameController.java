@@ -51,6 +51,20 @@ public class GameController {
         }
     }
     
+    @PostMapping("/player/{username}/buy-packs-batch")
+    public ResponseEntity<?> buyCardPacksBatch(@PathVariable String username, 
+                                               @RequestParam CardPack.PackType packType,
+                                               @RequestParam int quantity) {
+        if (quantity <= 0 || quantity > 1000) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "购买数量必须在1-1000之间");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        Map<String, Object> result = gameService.buyCardPacksBatch(username, packType, quantity);
+        return ResponseEntity.ok(result);
+    }
+    
     @PostMapping("/player/{username}/open-pack")
     public ResponseEntity<?> openCardPack(@PathVariable String username, 
                                           @RequestParam long packId) {
@@ -63,6 +77,14 @@ public class GameController {
             response.put("message", "卡牌包不存在或玩家不存在");
             return ResponseEntity.badRequest().body(response);
         }
+    }
+    
+    @PostMapping("/player/{username}/open-packs-batch")
+    public ResponseEntity<?> openCardPacksBatch(@PathVariable String username, 
+                                                @RequestParam CardPack.PackType packType,
+                                                @RequestParam(defaultValue = "all") String quantity) {
+        Map<String, Object> result = gameService.openCardPacksBatch(username, packType, quantity);
+        return ResponseEntity.ok(result);
     }
     
     @PostMapping("/player/{username}/sell-card")

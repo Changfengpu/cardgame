@@ -323,39 +323,23 @@ async function confirmBulkBuy() {
     }
 
     try {
-        let successCount = 0;
-        let failedCount = 0;
+        const response = await fetch(`${API_BASE}/player/${currentPlayer.username}/buy-packs-batch?packType=${packTypeEnum}&quantity=${quantity}`, {
+            method: 'POST'
+        });
         
-        // 批量购买
-        for (let i = 0; i < quantity; i++) {
-            try {
-                const response = await fetch(`${API_BASE}/player/${currentPlayer.username}/buy-pack?packType=${packTypeEnum}`, {
-                    method: 'POST'
-                });
-                
-                if (response.ok) {
-                    successCount++;
-                } else {
-                    failedCount++;
-                    // 如果是金币不足，提前终止
-                    const error = await response.json();
-                    if (error.message.includes('金币不足')) {
-                        showToast(`金币不足，只成功购买 ${successCount} 个卡牌包`, 'warning');
-                        break;
-                    }
-                }
-            } catch (error) {
-                failedCount++;
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+                bootstrap.Modal.getInstance(document.getElementById('bulkBuyModal')).hide();
+                showToast(result.message, 'success');
+                refreshPlayerInfo();
+                showBackpack();
+            } else {
+                showToast(result.message, 'error');
             }
-        }
-
-        if (successCount > 0) {
-            bootstrap.Modal.getInstance(document.getElementById('bulkBuyModal')).hide();
-            showToast(`成功购买 ${successCount} 个卡牌包！`, 'success');
-            refreshPlayerInfo();
-            showBackpack();
         } else {
-            showToast('购买失败，请重试', 'error');
+            const error = await response.json();
+            showToast(error.message, 'error');
         }
     } catch (error) {
         console.error('批量购买失败:', error);
@@ -646,43 +630,29 @@ async function confirmBulkOpen() {
     bootstrap.Modal.getInstance(document.getElementById('bulkOpenModal')).hide();
 
     try {
-        const allCards = [];
-        let openedCount = 0;
-        let failedCount = 0;
+        const response = await fetch(`${API_BASE}/player/${currentPlayer.username}/open-packs-batch?packType=${packType}&quantity=all`, {
+            method: 'POST'
+        });
 
-        // 批量开包
-        for (const pack of packsToOpen) {
-            try {
-                const response = await fetch(`${API_BASE}/player/${currentPlayer.username}/open-pack?packId=${pack.id}`, {
-                    method: 'POST'
-                });
-
-                if (response.ok) {
-                    const cards = await response.json();
-                    allCards.push(...cards);
-                    openedCount++;
-                } else {
-                    failedCount++;
-                }
-            } catch (error) {
-                failedCount++;
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+                showToast(result.message, 'success');
+                // 先刷新玩家信息，再渲染背包
+                await refreshPlayerInfo();
+                // 延迟一下确保数据更新完成
+                setTimeout(() => {
+                    renderBackpack();
+                }, 100);
+                
+                // 显示开包结果
+                showBulkOpenPackResult(result.cards);
+            } else {
+                showToast(result.message, 'error');
             }
-        }
-
-        if (openedCount > 0) {
-            showToast(`成功开启 ${openedCount} 个卡牌包，获得 ${allCards.length} 张卡牌！`, 'success');
-            // 先刷新玩家信息，再渲染背包
-            await refreshPlayerInfo();
-            // 延迟一下确保数据更新完成
-            setTimeout(() => {
-                renderBackpack();
-            }, 100);
-            
-            // 按稀有度和价格排序
-            const sortedCards = sortCards(allCards);
-            showBulkOpenPackResult(sortedCards);
         } else {
-            showToast('开包失败，请重试', 'error');
+            const error = await response.json();
+            showToast(error.message, 'error');
         }
     } catch (error) {
         console.error('批量开包失败:', error);
