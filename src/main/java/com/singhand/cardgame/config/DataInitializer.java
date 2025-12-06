@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,36 +44,53 @@ public class DataInitializer implements CommandLineRunner {
     private List<Card> loadCardsFromFile(String filePath) throws IOException {
         List<Card> cards = new ArrayList<>();
         
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line = reader.readLine();
-            if (line == null || !line.startsWith("序号")) {
-                return cards;
+        // 首先尝试从classpath加载
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+            this.getClass().getClassLoader().getResourceAsStream(filePath)))) {
+            if (reader != null) {
+                return loadCardsFromReader(reader);
             }
-            
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",", 5);
-                if (parts.length >= 5) {
-                    Card card = new Card();
-                    card.setId(Long.parseLong(parts[0]));
-                    card.setFixedName(parts[1]);
-                    
-                    String rarityName = parts[2];
-                    Card.Rarity rarity;
-                    switch (rarityName) {
-                        case "稀有": rarity = Card.Rarity.RARE; break;
-                        case "史诗": rarity = Card.Rarity.EPIC; break;
-                        case "传说": rarity = Card.Rarity.LEGENDARY; break;
-                        default: rarity = Card.Rarity.COMMON; break;
-                    }
-                    card.setRarity(rarity);
-                    
-                    card.setDescription(parts[3]);
-                    card.setBasePrice(Double.parseDouble(parts[4]));
-                    
-                    // 注意：模板卡牌不需要调用generateActualName()和calculateActualPrice()
-                    // 这些应该在真正抽取卡牌时调用
-                    cards.add(card);
+        } catch (Exception e) {
+            System.out.println("从classpath加载文件失败: " + e.getMessage());
+        }
+        
+        // 如果classpath加载失败，尝试从文件系统加载
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            return loadCardsFromReader(reader);
+        }
+    }
+    
+    private List<Card> loadCardsFromReader(BufferedReader reader) throws IOException {
+        List<Card> cards = new ArrayList<>();
+        
+        String line = reader.readLine();
+        if (line == null || !line.startsWith("序号")) {
+            return cards;
+        }
+        
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",", 5);
+            if (parts.length >= 5) {
+                Card card = new Card();
+                card.setId(Long.parseLong(parts[0]));
+                card.setFixedName(parts[1]);
+                
+                String rarityName = parts[2];
+                Card.Rarity rarity;
+                switch (rarityName) {
+                    case "稀有": rarity = Card.Rarity.RARE; break;
+                    case "史诗": rarity = Card.Rarity.EPIC; break;
+                    case "传说": rarity = Card.Rarity.LEGENDARY; break;
+                    default: rarity = Card.Rarity.COMMON; break;
                 }
+                card.setRarity(rarity);
+                
+                card.setDescription(parts[3]);
+                card.setBasePrice(Double.parseDouble(parts[4]));
+                
+                // 注意：模板卡牌不需要调用generateActualName()和calculateActualPrice()
+                // 这些应该在真正抽取卡牌时调用
+                cards.add(card);
             }
         }
         

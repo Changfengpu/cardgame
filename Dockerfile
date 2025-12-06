@@ -1,8 +1,5 @@
-# 使用官方的Java 8运行时作为基础镜像
-FROM openjdk:8-jdk-alpine
-
-# 安装Maven
-RUN apk add --no-cache maven
+# 使用Maven官方镜像，包含Java和Maven
+FROM maven:3.8.4-openjdk-17
 
 # 设置工作目录
 WORKDIR /app
@@ -12,6 +9,9 @@ COPY pom.xml .
 
 # 复制源代码
 COPY src ./src
+
+# 复制卡牌数据文件
+COPY cards_data.txt .
 
 # 构建应用
 RUN mvn clean package -DskipTests
