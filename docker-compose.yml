@@ -1,4 +1,4 @@
-version: '3.8'
+version: '2.4'
 
 services:
   cardgame:
@@ -8,35 +8,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xmx512m -Xms256m
-    volumes:
-      - ./data:/app/data
-    restart: unless-stopped
-
-  # 可选：添加数据库
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: yourpassword
-      MYSQL_DATABASE: cardgame
-      MYSQL_USER: cardgame
-      MYSQL_PASSWORD: yourpassword
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d
-    ports:
-      - "3306:3306"
-    restart: unless-stopped
-
-  # 可选：添加Redis
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
     restart: unless-stopped
 
 volumes:
-  mysql_data:
-  redis_data:
-  data:
+  cardgame_data:

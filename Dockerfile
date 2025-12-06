@@ -1,5 +1,8 @@
 # 使用官方的Java 8运行时作为基础镜像
-FROM openjdk:8-jdk-slim
+FROM openjdk:8-jdk-alpine
+
+# 安装Maven
+RUN apk add --no-cache maven
 
 # 设置工作目录
 WORKDIR /app
